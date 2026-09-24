@@ -39,6 +39,18 @@ Environment variables:
 > On Render's **free** plan the service sleeps after inactivity, so scheduled notifications are sent
 > when it wakes up. Use a paid instance for exact scheduling.
 
+### Keep-awake ping (GitHub Actions)
+
+`.github/workflows/keep-awake.yml` calls `GET /api/health` **every 5 hours** so the free instance
+wakes up and processes due scheduled notifications. Setup:
+
+1. Repo → **Settings → Secrets and variables → Actions → Variables** → add `BACKEND_URL`
+   (e.g. `https://beacon-back.onrender.com`).
+2. Run it once from the **Actions** tab (“Keep Render awake” → *Run workflow*) to test.
+
+Render sleeps again ~15 min after the last request; change the cron to `*/10 * * * *` to keep it
+awake all the time. GitHub pauses scheduled workflows after 60 days without repository activity.
+
 ## API
 
 | Method & path | Auth | Purpose |

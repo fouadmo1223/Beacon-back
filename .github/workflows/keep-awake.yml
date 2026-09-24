@@ -1,0 +1,43 @@
+name: Keep Render awake
+
+# Pings the API so the Render free instance wakes up (and runs due scheduled
+# notifications / push receipts). Render sleeps again after ~15 min without traffic —
+# lower the interval (e.g. "*/10 * * * *") to keep it awake continuously.
+on:
+  schedule:
+    - cron: "0 */5 * * *" # every 5 hours (UTC)
+  workflow_dispatch: # allow running it manually from the Actions tab
+
+permissions:
+  contents: read
+
+concurrency:
+  group: keep-awake
+  cancel-in-progress: true
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping /api/health
+        env:
+          BACKEND_URL: ${{ vars.BACKEND_URL }}
+        run: |
+          if [ -z "$BACKEND_URL" ]; then
+            echo "::error::Set the BACKEND_URL repository variable (Settings → Secrets and variables → Actions → Variables)."
+            exit 1
+          fi
+          url="${BACKEND_URL%/}/api/health"
+          # A sleeping free instance can take ~1 minute to boot, so retry patiently.
+          for attempt in 1 2 3 4 5 6; do
+            status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 "$url" || true)
+            echo "Attempt $attempt: HTTP $status"
+            if [ "$status" = "200" ]; then
+              echo "API is awake ✅"
+              exit 0
+            fi
+            sleep 20
+          done
+          echo "::error::API did not respond with 200 at $url"
+          exit 1
