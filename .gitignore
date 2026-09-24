@@ -1,0 +1,25 @@
+node_modules/
+dist/
+web-build/
+coverage/
+*.tsbuildinfo
+.expo/
+android/
+ios/
+data/
+
+# Secrets — only .env.example files are committed
+.env
+.env.*
+!.env.example
+google-services.json
+GoogleService-Info.plist
+*.p8
+*.p12
+*.jks
+*.keystore
+*.mobileprovision
+
+*.log
+.DS_Store
+Thumbs.db
