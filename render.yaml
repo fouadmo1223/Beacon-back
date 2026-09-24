@@ -1,0 +1,33 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+# New → Blueprint → select this repo. Secrets marked `sync: false` are asked for on first deploy.
+services:
+  - type: web
+    name: beacon-back
+    runtime: node
+    plan: free
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: HOST
+        value: 0.0.0.0
+      - key: TRUST_PROXY
+        value: "true"
+      - key: LOG_LEVEL
+        value: info
+      # Neon pooled connection string (…?sslmode=verify-full)
+      - key: DATABASE_URL
+        sync: false
+      # Long random secret — the dashboard signs in with it
+      - key: ADMIN_API_KEY
+        sync: false
+      # Your Vercel dashboard URL(s), comma separated, e.g. https://beacon-front.vercel.app
+      - key: CORS_ORIGINS
+        sync: false
+      # Only if "Enhanced push security" is enabled in EAS
+      - key: EXPO_ACCESS_TOKEN
+        sync: false
